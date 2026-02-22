@@ -1,5 +1,6 @@
 {
-  "name": "ai-roast-me",
+  "name": "fungen-roast",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -7,10 +8,9 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "14.2.3",
+    "next": "13.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "stripe": "^14.0.0",
-    "openai": "^4.0.0"
+    "openai": "^4.33.0"
   }
 }
