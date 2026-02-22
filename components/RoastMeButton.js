@@ -10,15 +10,15 @@ export default function RoastMeButton() {
   const [error, setError] = useState("");
 
   const handleRoast = async () => {
+    setError("");
+    setRoast("");
+
     if (!name.trim() || !traits.trim()) {
       setError("Please enter both name and traits.");
       return;
     }
 
     setLoading(true);
-    setError("");
-    setRoast("");
-
     try {
       const response = await fetch("/api/roast", {
         method: "POST",
@@ -26,16 +26,16 @@ export default function RoastMeButton() {
         body: JSON.stringify({ name, traits })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || "Server error");
+        throw new Error(data.error || "Server error");
       }
 
-      const data = await response.json();
-      setRoast(data.roast);
+      setRoast(data.roast || "No roast returned.");
     } catch (err) {
-      console.error("Fetch error:", err);
-      setError(err.message);
+      console.error("Frontend fetch error:", err);
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
