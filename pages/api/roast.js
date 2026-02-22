@@ -30,11 +30,12 @@ export default async function handler(req, res) {
       ]
     });
 
-    const roastText = completion?.choices?.[0]?.message?.content || "Couldn't generate a roast.";
+const roastText = completion?.choices?.[0]?.message?.content || "Couldn't generate a roast.";
+    console.log("OpenAI response:", roastText);
 
     res.status(200).json({ roast: roastText });
   } catch (err) {
-    console.error("Roast API error:", err);
+    console.error("Server error:", err);
     res.status(500).json({ error: "Server error", details: err.message });
   }
 }
