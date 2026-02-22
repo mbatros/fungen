@@ -1,47 +1,24 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
+import OpenAI from 'openai';
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export default async function handler(req, res) {
-  console.log("API Hit:", req.method, req.body);
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
-
+  console.log('API Hit:', req.method, req.body);
+  if(req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
   const { name, traits } = req.body || {};
-
-  if (!name || !traits) {
-    return res.status(400).json({ error: "Missing name or traits" });
-  }
-
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("Missing OpenAI API Key");
-    return res.status(500).json({ error: "Server misconfiguration: missing API key" });
-  }
-
+  if(!name || !traits) return res.status(400).json({ error: 'Missing name or traits' });
+  if(!process.env.OPENAI_API_KEY) return res.status(500).json({ error: 'Missing API key' });
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: 'gpt-4o-mini',
       messages: [
-        {
-          role: "system",
-          content: "You are a savage but funny roast comedian. Keep it under 120 words."
-        },
-        {
-          role: "user",
-          content: `Roast ${name} who is described as: ${traits}`
-        }
+        { role: 'system', content: 'You are a savage but funny roast comedian. Keep it under 120 words.' },
+        { role: 'user', content: `Roast ${name} who is described as: ${traits}` }
       ]
     });
-
     const roastText = completion?.choices?.[0]?.message?.content || "Couldn't generate a roast.";
-    console.log("OpenAI Response:", roastText);
+    console.log('OpenAI Response:', roastText);
     res.status(200).json({ roast: roastText });
-  } catch (err) {
-    console.error("OpenAI Error:", err);
-    res.status(500).json({ error: "OpenAI API error", details: err.message });
+  } catch(err) {
+    console.error('OpenAI Error:', err);
+    res.status(500).json({ error: 'OpenAI API error', details: err.message });
   }
 }
