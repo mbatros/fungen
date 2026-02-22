@@ -1,20 +1,71 @@
+"use client";
 
-import OpenAI from "openai";
+import { useState } from "react";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+export default function RoastMeButton() {
+  const [name, setName] = useState("");
+  const [traits, setTraits] = useState("");
+  const [roast, setRoast] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  const handleRoast = async () => {
+    if (!name.trim() || !traits.trim()) {
+      setError("Please enter both name and traits.");
+      return;
+    }
 
-  const { name, traits } = req.body;
+    setLoading(true);
+    setError("");
+    setRoast("");
 
-  const completion = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: "You are a savage but funny roast comedian. Keep it under 120 words." },
-      { role: "user", content: `Roast ${name} who is described as: ${traits}` }
-    ]
-  });
+    try {
+      const response = await fetch("/api/roast", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, traits })
+      });
 
-  res.status(200).json({ roast: completion.choices[0].message.content });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Server error");
+      }
+
+      const data = await response.json();
+      setRoast(data.roast);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: "500px", margin: "0 auto", textAlign: "center" }}>
+      <input
+        type="text"
+        placeholder="Enter name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        style={{ width: "80%", padding: "8px", margin: "5px 0" }}
+      />
+      <textarea
+        placeholder="Enter traits"
+        value={traits}
+        onChange={(e) => setTraits(e.target.value)}
+        style={{ width: "80%", padding: "8px", margin: "5px 0" }}
+      />
+      <button
+        onClick={handleRoast}
+        disabled={loading}
+        style={{ padding: "10px 20px", margin: "10px 0", cursor: "pointer" }}
+      >
+        {loading ? "Roasting..." : "Roast Me"}
+      </button>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {roast && <p style={{ marginTop: "10px", fontWeight: "bold" }}>{roast}</p>}
+    </div>
+  );
 }
