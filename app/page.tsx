@@ -62,6 +62,24 @@ export default function HomePage() {
     link.href = canvas.toDataURL();
     link.click();
   };
+  
+  const [isSavage, setIsSavage] = useState(false);
+  
+  useEffect(() => {
+    const unlocked = localStorage.getItem("savageUnlocked");
+    const unlockDate = localStorage.getItem("unlockDate");
+  
+    if (unlocked && unlockDate) {
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+  
+      if (Date.now() - parseInt(unlockDate) < sevenDays) {
+        setIsSavage(true);
+      } else {
+        localStorage.removeItem("savageUnlocked");
+        localStorage.removeItem("unlockDate");
+      }
+    }
+  }, []);
 
   return (
     <div style={{ padding: "40px", textAlign: "center" }}>
@@ -85,34 +103,19 @@ export default function HomePage() {
       <br />
 
       <button
-        onClick={generateRoast}
+        onClick={handleUnlock}
         style={{
+          marginTop: "20px",
           padding: "12px 24px",
-          borderRadius: "8px",
-          backgroundColor: "#9333ea",
+          background: "linear-gradient(to right, purple, pink)",
           color: "white",
           border: "none",
-          cursor: "pointer",
+          borderRadius: "8px",
+          cursor: "pointer"
         }}
       >
-        {loading ? "Roasting..." : "Generate Roast"}
+        🔥 Unlock Savage Mode – $2.99/week
       </button>
-
-      {!isSavage && (
-        <div style={{ marginTop: "20px" }}>
-          <button
-            onClick={handleUnlock}
-            style={{
-              padding: "12px 24px",
-              borderRadius: "8px",
-              background: "linear-gradient(to right, purple, pink)",
-              color: "white",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            🔥 Unlock Savage Mode – $2.99/week
-          </button>
         </div>
       )}
 
