@@ -15,6 +15,7 @@ export default function HomePage() {
 
     if (unlocked && unlockDate) {
       const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
       if (Date.now() - parseInt(unlockDate) < sevenDays) {
         setIsSavage(true);
       } else {
@@ -25,6 +26,8 @@ export default function HomePage() {
   }, []);
 
   const generateRoast = async () => {
+    if (!input) return;
+
     setLoading(true);
 
     const response = await fetch("/api/roast", {
@@ -62,75 +65,84 @@ export default function HomePage() {
     link.href = canvas.toDataURL();
     link.click();
   };
-  
-  const [isSavage, setIsSavage] = useState(false);
-  
-  useEffect(() => {
-    const unlocked = localStorage.getItem("savageUnlocked");
-    const unlockDate = localStorage.getItem("unlockDate");
-  
-    if (unlocked && unlockDate) {
-      const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  
-      if (Date.now() - parseInt(unlockDate) < sevenDays) {
-        setIsSavage(true);
-      } else {
-        localStorage.removeItem("savageUnlocked");
-        localStorage.removeItem("unlockDate");
-      }
-    }
-  }, []);
 
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
-      <h1 style={{ fontSize: "36px", marginBottom: "20px" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "black",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        paddingTop: "60px",
+      }}
+    >
+      <h1 style={{ fontSize: "40px", marginBottom: "30px" }}>
         🔥 FunGen Savage Roaster
       </h1>
 
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Enter name or description..."
+        placeholder="Enter name or traits..."
         style={{
-          padding: "12px",
+          padding: "14px",
           width: "300px",
-          borderRadius: "8px",
+          borderRadius: "10px",
           border: "none",
           marginBottom: "20px",
         }}
       />
 
-      <br />
-
       <button
-        onClick={handleUnlock}
+        onClick={generateRoast}
         style={{
-          marginTop: "20px",
           padding: "12px 24px",
-          background: "linear-gradient(to right, purple, pink)",
+          borderRadius: "10px",
+          backgroundColor: "#9333ea",
           color: "white",
           border: "none",
-          borderRadius: "8px",
-          cursor: "pointer"
+          cursor: "pointer",
+          marginBottom: "20px",
         }}
       >
-        🔥 Unlock Savage Mode – $2.99/week
+        {loading ? "Roasting..." : "🔥 Roast Me"}
       </button>
-        </div>
+
+      {!isSavage && (
+        <button
+          onClick={handleUnlock}
+          style={{
+            padding: "12px 24px",
+            borderRadius: "10px",
+            background: "linear-gradient(to right, purple, pink)",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: "30px",
+          }}
+        >
+          🔥 Unlock Savage Mode – $2.99/week
+        </button>
       )}
 
       {roast && (
         <div
           id="roast-card"
           style={{
-            marginTop: "40px",
-            padding: "20px",
             backgroundColor: "#111",
-            borderRadius: "12px",
+            padding: "25px",
+            borderRadius: "15px",
+            width: "350px",
+            textAlign: "center",
           }}
         >
-          <h2>{isSavage ? "Savage Mode 🔥" : "Basic Roast"}</h2>
-          <p>{roast}</p>
+          <h2 style={{ marginBottom: "15px" }}>
+            {isSavage ? "Savage Mode 🔥" : "Basic Roast"}
+          </h2>
+
+          <p style={{ lineHeight: "1.6" }}>{roast}</p>
 
           <button
             onClick={downloadImage}
