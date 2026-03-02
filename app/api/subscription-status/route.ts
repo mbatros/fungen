@@ -5,22 +5,31 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2023-10-16",
 });
 
-export async function GET(req: Request) {
-  const cookieHeader = req.headers.get("cookie") || "";
-  const cookies = Object.fromEntries(
-    cookieHeader.split("; ").map((c) => c.split("="))
+function parseCookies(header: string | null) {
+  if (!header) return {};
+  return Object.fromEntries(
+    header.split(";").map((c) => {
+      const [k, ...v] = c.trim().split("=");
+      return [k, v.join("=")];
+    })
   );
+}
 
+export async function GET(req: Request) {
+  const cookies = parseCookies(req.headers.get("cookie"));
   const uid = cookies["fungen_uid"];
 
   if (!uid) {
-    return NextResponse.json({ active: false });
+    return NextResponse.json({
+      active: false,
+      expires: null,
+      uid: null,
+    });
   }
 
   const customers = await stripe.customers.list({
     limit: 1,
     expand: ["data.subscriptions"],
-    email: undefined,
   });
 
   const customer = customers.data.find(
@@ -28,13 +37,21 @@ export async function GET(req: Request) {
   );
 
   if (!customer) {
-    return NextResponse.json({ active: false });
+    return NextResponse.json({
+      active: false,
+      expires: null,
+      uid,
+    });
   }
 
   const active = customer.metadata?.subscription_active === "true";
 
+  const sub = customer.subscriptions?.data?.[0];
+  const expires = sub?.current_period_end || null;
+
   return NextResponse.json({
     active,
-    expires: customer.subscriptions?.data?.[0]?.current_period_end || null,
+    expires,
+    uid,
   });
 }
