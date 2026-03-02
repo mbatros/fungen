@@ -66,19 +66,18 @@ export async function POST(req: Request) {
       break;
     }
 
-    case "customer.subscription.deleted":
-    case "customer.subscription.canceled": {
-      const subscription = event.data.object as Stripe.Subscription;
-      const customerId = subscription.customer.toString();
+    case "customer.subscription.deleted": {
+  const subscription = event.data.object as Stripe.Subscription;
+  const customerId = subscription.customer.toString();
 
-      await stripe.customers.update(customerId, {
-        metadata: {
-          subscription_active: "false",
-        },
-      });
+  await stripe.customers.update(customerId, {
+    metadata: {
+      subscription_active: "false",
+    },
+  });
 
-      break;
-    }
+  break;
+}
 
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
