@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-export const runtime = "nodejs"; // Webhooks must run in Node, not Edge
+export const runtime = "nodejs"; // Webhooks must run in Node.js
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2024-06-20",
@@ -24,12 +24,16 @@ export async function POST(req: Request) {
   }
 
   switch (event.type) {
+    //
+    // 1. Checkout completed → activate subscription + attach UID
+    //
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
 
       if (!session.customer) break;
 
       const customerId = session.customer.toString();
+
       const uid =
         session.client_reference_id ||
         session.metadata?.fungen_uid ||
@@ -48,6 +52,9 @@ export async function POST(req: Request) {
       break;
     }
 
+    //
+    // 2. Subscription created or updated → sync active status
+    //
     case "customer.subscription.created":
     case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
@@ -66,19 +73,25 @@ export async function POST(req: Request) {
       break;
     }
 
+    //
+    // 3. Subscription deleted (canceled or ended) → deactivate
+    //
     case "customer.subscription.deleted": {
-  const subscription = event.data.object as Stripe.Subscription;
-  const customerId = subscription.customer.toString();
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId = subscription.customer.toString();
 
-  await stripe.customers.update(customerId, {
-    metadata: {
-      subscription_active: "false",
-    },
-  });
+      await stripe.customers.update(customerId, {
+        metadata: {
+          subscription_active: "false",
+        },
+      });
 
-  break;
-}
+      break;
+    }
 
+    //
+    // 4. Payment failed → deactivate
+    //
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
       const customerId = invoice.customer?.toString();
