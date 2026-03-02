@@ -1,33 +1,21 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-export const config = {
-  api: {
-    bodyParser: false, // Required for Stripe signature verification
-  },
-};
+export const runtime = "nodejs"; // Webhooks must run in Node, not Edge
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
   apiVersion: "2023-10-16",
 });
 
-async function buffer(readable: any) {
-  const chunks = [];
-  for await (const chunk of readable) {
-    chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
-}
-
 export async function POST(req: Request) {
-  const buf = await buffer(req.body);
+  const body = await req.text();
   const sig = req.headers.get("stripe-signature") as string;
 
   let event: Stripe.Event;
 
   try {
     event = stripe.webhooks.constructEvent(
-      buf,
+      body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET as string
     );
@@ -35,44 +23,75 @@ export async function POST(req: Request) {
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
-  // Handle events
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
 
-      if (session.mode === "subscription") {
-        await stripe.customers.update(session.customer as string, {
+      if (!session.customer) break;
+
+      const customerId = session.customer.toString();
+      const uid =
+        session.client_reference_id ||
+        session.metadata?.fungen_uid ||
+        null;
+
+      if (uid) {
+        await stripe.customers.update(customerId, {
           metadata: {
+            ...(session.metadata || {}),
+            fungen_uid: uid,
             subscription_active: "true",
-            subscription_id: session.subscription as string,
           },
         });
       }
+
       break;
     }
 
-    case "invoice.payment_succeeded": {
-      const invoice = event.data.object as Stripe.Invoice;
-
-      if (invoice.customer) {
-        await stripe.customers.update(invoice.customer as string, {
-          metadata: {
-            subscription_active: "true",
-            subscription_id: invoice.subscription as string,
-          },
-        });
-      }
-      break;
-    }
-
-    case "customer.subscription.deleted": {
+    case "customer.subscription.created":
+    case "customer.subscription.updated": {
       const subscription = event.data.object as Stripe.Subscription;
+      const customerId = subscription.customer.toString();
 
-      await stripe.customers.update(subscription.customer as string, {
+      const isActive =
+        subscription.status === "active" ||
+        subscription.status === "trialing";
+
+      await stripe.customers.update(customerId, {
+        metadata: {
+          subscription_active: isActive ? "true" : "false",
+        },
+      });
+
+      break;
+    }
+
+    case "customer.subscription.deleted":
+    case "customer.subscription.canceled": {
+      const subscription = event.data.object as Stripe.Subscription;
+      const customerId = subscription.customer.toString();
+
+      await stripe.customers.update(customerId, {
         metadata: {
           subscription_active: "false",
         },
       });
+
+      break;
+    }
+
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customerId = invoice.customer?.toString();
+
+      if (customerId) {
+        await stripe.customers.update(customerId, {
+          metadata: {
+            subscription_active: "false",
+          },
+        });
+      }
+
       break;
     }
   }
