@@ -4,7 +4,7 @@ import Stripe from "stripe";
 export const runtime = "nodejs";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2024-06-20",
 });
 
 function parseCookies(header: string | null) {
