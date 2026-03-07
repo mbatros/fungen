@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
       }}
     >
       <div>Roast: {roast}</div>
+      <div>ID: 123</div>
     </div>,
     {
       width: 1200,
