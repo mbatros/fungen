@@ -9,12 +9,13 @@ export async function GET(request: Request) {
   const intensity = searchParams.get("intensity") || "";
   const id = searchParams.get("id") || "";
 
-  const badgeGradient =
+  // Simple neon colors (no gradients yet)
+  const intensityColor =
     intensity === "nuclear"
-      ? "linear-gradient(90deg, #ff0080, #ff8c00)"
+      ? "#ff8c00"
       : intensity === "savage"
-      ? "linear-gradient(90deg, #8a2be2, #00bfff)"
-      : "linear-gradient(90deg, #4ade80, #22c55e)";
+      ? "#8a2be2"
+      : "#22c55e";
 
   return new ImageResponse(
     (
@@ -29,8 +30,7 @@ export async function GET(request: Request) {
           padding: "60px",
           color: "white",
           fontFamily: "sans-serif",
-          border: "4px solid #ec4899",
-          boxShadow: "0 0 40px rgba(236, 72, 153, 0.5)",
+          border: "6px solid #ec4899",
         }}
       >
         {/* Roast Text */}
@@ -40,7 +40,6 @@ export async function GET(request: Request) {
             lineHeight: 1.3,
             fontWeight: 600,
             whiteSpace: "pre-wrap",
-            textShadow: "0 0 10px rgba(255,255,255,0.4)",
           }}
         >
           {roast}
@@ -59,11 +58,10 @@ export async function GET(request: Request) {
             style={{
               padding: "10px 28px",
               borderRadius: 9999,
-              background: badgeGradient,
+              background: intensityColor,
               fontWeight: 700,
               fontSize: 28,
               color: "white",
-              textShadow: "0 0 6px rgba(0,0,0,0.4)",
             }}
           >
             {intensity.toUpperCase()}
@@ -89,7 +87,6 @@ export async function GET(request: Request) {
             marginTop: 20,
             fontSize: 20,
             opacity: 0.6,
-            letterSpacing: 1,
           }}
         >
           FunGen • Savage Mode
