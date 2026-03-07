@@ -6,14 +6,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY!,
 });
 
-async function checkSubscription(req: Request) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/subscription-status`, {
-    headers: { cookie: req.headers.get("cookie") || "" },
-    cache: "no-store",
-  });
-
-  const data = await res.json();
-  return data.active === true;
+// TEMPORARY FIX — prevents OG route from breaking
+async function checkSubscription() {
+  return false; // always treat user as non‑pro for now
 }
 
 function randomItem(arr: string[]) {
@@ -23,7 +18,8 @@ function randomItem(arr: string[]) {
 export async function POST(req: Request) {
   const { input, intensity } = await req.json();
 
-  const isPro = await checkSubscription(req);
+  // SAFE: no internal API calls
+  const isPro = await checkSubscription();
 
   const level = isPro ? intensity : "spicy";
 
@@ -72,7 +68,11 @@ Make it screenshot‑worthy.
   let roast = completion.choices[0].message.content;
 
   const roastId = crypto.randomBytes(8).toString("hex");
-  const hash = crypto.createHash("sha256").update(roast).digest("hex").slice(0, 12);
+  const hash = crypto
+    .createHash("sha256")
+    .update(roast)
+    .digest("hex")
+    .slice(0, 12);
 
   return NextResponse.json({
     roast,
