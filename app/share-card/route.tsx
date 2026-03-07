@@ -2,7 +2,13 @@ export const runtime = "edge";
 
 import { ImageResponse } from "next/og";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+
+  const roast = searchParams.get("roast") || "NO ROAST";
+  const intensity = searchParams.get("intensity") || "NONE";
+  const id = searchParams.get("id") || "0";
+
   return new ImageResponse(
     (
       <div
@@ -12,13 +18,16 @@ export async function GET() {
           background: "black",
           color: "white",
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          fontSize: 60,
+          fontSize: 40,
           fontFamily: "sans-serif",
         }}
       >
-        TEST
+        <div>Roast: {roast}</div>
+        <div>Intensity: {intensity}</div>
+        <div>ID: {id}</div>
       </div>
     ),
     {
