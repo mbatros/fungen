@@ -11,24 +11,28 @@ export async function GET(req: NextRequest) {
   const id = searchParams.get("id") ?? "0";
 
   return new ImageResponse(
-    <div
-      style={{
-        width: "1200px",
-        height: "630px",
-        backgroundColor: "black",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        fontSize: 40,
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <div>Roast: {roast}</div>
-      <div>Intensity: {intensity}</div>
-      <div>ID: {id}</div>
-    </div>,
+    {
+      type: "div",
+      props: {
+        style: {
+          width: "1200px",
+          height: "630px",
+          backgroundColor: "black",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "48px",
+          fontFamily: "Arial",
+        },
+        children: [
+          { type: "div", props: { children: `Roast: ${roast}` } },
+          { type: "div", props: { children: `Intensity: ${intensity}` } },
+          { type: "div", props: { children: `ID: ${id}` } },
+        ],
+      },
+    },
     {
       width: 1200,
       height: 630,
