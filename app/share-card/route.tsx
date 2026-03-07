@@ -6,31 +6,33 @@ import type { NextRequest } from "next/server";
 export async function GET(req: NextRequest) {
   const roast = req.nextUrl.searchParams.get("roast") ?? "NO ROAST";
 
-  return new ImageResponse(
-    (
-      <svg
-        width="1200"
-        height="630"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          background: "black",
-          color: "white",
-          fontFamily: "Arial",
-        }}
+  const svg = `
+    <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="630" fill="black" />
+      <text
+        x="50%"
+        y="50%"
+        font-size="48"
+        fill="white"
+        font-family="Arial"
+        text-anchor="middle"
+        dominant-baseline="middle"
       >
-        <rect width="1200" height="630" fill="black" />
-        <text
-          x="50%"
-          y="50%"
-          fontSize="48"
-          fill="white"
-          textAnchor="middle"
-          dominantBaseline="middle"
-        >
-          {roast}
-        </text>
-      </svg>
-    ),
+        ${roast}
+      </text>
+    </svg>
+  `;
+
+  const base64 = Buffer.from(svg).toString("base64");
+  const dataUrl = `data:image/svg+xml;base64,${base64}`;
+
+  return new ImageResponse(
+    <img
+      src={dataUrl}
+      width={1200}
+      height={630}
+      style={{ display: "block" }}
+    />,
     {
       width: 1200,
       height: 630,
