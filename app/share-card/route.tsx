@@ -23,8 +23,17 @@ export async function GET(req: NextRequest) {
     </svg>
   `;
 
-  return new ImageResponse(svg, {
-    width: 1200,
-    height: 630,
-  });
+  return new ImageResponse(
+    <div
+      style={{
+        width: "1200px",
+        height: "630px",
+      }}
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />,
+    {
+      width: 1200,
+      height: 630,
+    }
+  );
 }
