@@ -19,8 +19,11 @@ export async function GET(req: NextRequest) {
         alignItems: "center",
       }}
     >
-      <div>Roast: {roast}</div>
-      <div>ID: 123</div>
+      {/* ONE CHILD ONLY */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div>Roast: {roast}</div>
+        <div>ID: 123</div>
+      </div>
     </div>,
     {
       width: 1200,
