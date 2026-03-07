@@ -2,7 +2,7 @@ export const runtime = "edge";
 
 import { ImageResponse } from "next/og";
 
-export async function GET() {
+export async function GET(request: Request) {
   return new ImageResponse(
     (
       <div
