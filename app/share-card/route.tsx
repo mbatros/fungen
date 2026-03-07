@@ -9,7 +9,6 @@ export async function GET(request: Request) {
   const intensity = searchParams.get("intensity") || "";
   const id = searchParams.get("id") || "";
 
-  // Simple neon colors (no gradients yet)
   const intensityColor =
     intensity === "nuclear"
       ? "#ff8c00"
@@ -30,10 +29,8 @@ export async function GET(request: Request) {
           padding: "60px",
           color: "white",
           fontFamily: "sans-serif",
-          border: "6px solid #ec4899",
         }}
       >
-        {/* Roast Text */}
         <div
           style={{
             fontSize: 48,
@@ -45,7 +42,6 @@ export async function GET(request: Request) {
           {roast}
         </div>
 
-        {/* Footer Row */}
         <div
           style={{
             display: "flex",
@@ -53,7 +49,6 @@ export async function GET(request: Request) {
             alignItems: "center",
           }}
         >
-          {/* Intensity Badge */}
           <div
             style={{
               padding: "10px 28px",
@@ -67,7 +62,6 @@ export async function GET(request: Request) {
             {intensity.toUpperCase()}
           </div>
 
-          {/* Roast ID */}
           <div
             style={{
               fontSize: 22,
@@ -79,7 +73,6 @@ export async function GET(request: Request) {
           </div>
         </div>
 
-        {/* Branding */}
         <div
           style={{
             width: "100%",
