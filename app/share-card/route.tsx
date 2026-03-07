@@ -1,8 +1,11 @@
 export const runtime = "edge";
 
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const roast = req.nextUrl.searchParams.get("roast") ?? "NO ROAST";
+
   return new ImageResponse(
     <div
       style={{
@@ -16,7 +19,7 @@ export async function GET() {
         alignItems: "center",
       }}
     >
-      Roast: Hello
+      Roast: {roast}
     </div>,
     {
       width: 1200,
