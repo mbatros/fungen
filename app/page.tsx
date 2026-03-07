@@ -49,18 +49,18 @@ export default function HomePage() {
 
   const handleShareCard = async () => {
     if (!roast) return;
-    const url = `/api/share-card?roast=${encodeURIComponent(
+    const url = `/share-card?roast=${encodeURIComponent(
       roast.roast
     )}&intensity=${roast.intensity}&id=${roast.roastId}`;
     window.open(url, "_blank");
   };
 
   const goToCheckout = () => {
-    window.location.href = "/api/checkout"; // your existing Stripe checkout route
+    window.location.href = "/api/checkout";
   };
 
   const restorePurchase = () => {
-    window.location.href = "/restore"; // you can implement a simple restore flow later
+    window.location.href = "/restore";
   };
 
   return (
@@ -97,7 +97,9 @@ export default function HomePage() {
               ) : isPro ? (
                 <span className="text-fuchsia-400">Savage Mode active</span>
               ) : (
-                <span className="text-zinc-500">Spicy is free. Savage & Nuclear in Savage Mode.</span>
+                <span className="text-zinc-500">
+                  Spicy is free. Savage & Nuclear in Savage Mode.
+                </span>
               )}
             </div>
 
@@ -156,7 +158,9 @@ export default function HomePage() {
         {!isPro && (
           <section className="bg-zinc-950 border border-fuchsia-700/60 rounded-2xl p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-fuchsia-300">Unlock Savage Mode</h2>
+              <h2 className="text-sm font-semibold text-fuchsia-300">
+                Unlock Savage Mode
+              </h2>
               <span className="text-xs text-zinc-400">$2.99 / week</span>
             </div>
             <ul className="text-xs text-zinc-300 space-y-1 mb-3">
