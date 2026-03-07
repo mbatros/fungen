@@ -15,16 +15,68 @@ export async function GET(request: Request) {
         style={{
           width: 1200,
           height: 630,
-          background: "#000000",
+          background: "#0a0a0a",
           color: "white",
           display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 60,
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "60px",
           fontFamily: "sans-serif",
         }}
       >
-        TEST SHARE CARD
+        <div
+          style={{
+            fontSize: 48,
+            lineHeight: 1.3,
+            fontWeight: 600,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {roast}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              padding: "10px 28px",
+              borderRadius: 9999,
+              background: "#ec4899",
+              fontWeight: 700,
+              fontSize: 28,
+              color: "white",
+            }}
+          >
+            {intensity.toUpperCase()}
+          </div>
+
+          <div
+            style={{
+              fontSize: 22,
+              opacity: 0.7,
+              textAlign: "right",
+            }}
+          >
+            Roast ID: {id}
+          </div>
+        </div>
+
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginTop: 20,
+            fontSize: 20,
+            opacity: 0.6,
+          }}
+        >
+          FunGen • Savage Mode
+        </div>
       </div>
     ),
     {
