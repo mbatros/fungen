@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   return new ImageResponse(
     <div
       style={{
-        fontSize: 64,
+        fontSize: 48,
         color: "white",
         background: "black",
         width: "100%",
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         alignItems: "center",
       }}
     >
-      Roast: {roast}
+      <div>Roast: {roast}</div>
     </div>,
     {
       width: 1200,
