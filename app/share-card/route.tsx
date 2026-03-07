@@ -5,6 +5,10 @@ import type { NextRequest } from "next/server";
 
 export async function GET(req: NextRequest) {
   const roast = req.nextUrl.searchParams.get("roast") ?? "NO ROAST";
+  const intensity = req.nextUrl.searchParams.get("intensity") ?? "NONE";
+  const id = req.nextUrl.searchParams.get("id") ?? "0";
+
+  const text = `Roast: ${roast} | Intensity: ${intensity} | ID: ${id}`;
 
   return new ImageResponse(
     <div
@@ -17,13 +21,11 @@ export async function GET(req: NextRequest) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        textAlign: "center",
+        padding: "40px",
       }}
     >
-      {/* ONE CHILD ONLY */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-        <div>Roast: {roast}</div>
-        <div>ID: 123</div>
-      </div>
+      {text}
     </div>,
     {
       width: 1200,
