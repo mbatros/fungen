@@ -1,13 +1,14 @@
 export const runtime = "edge";
 
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+export async function GET(req: NextRequest) {
+  const { searchParams } = req.nextUrl;
 
-  const roast = searchParams.get("roast") || "NO ROAST";
-  const intensity = searchParams.get("intensity") || "NONE";
-  const id = searchParams.get("id") || "0";
+  const roast = searchParams.get("roast") ?? "NO ROAST";
+  const intensity = searchParams.get("intensity") ?? "NONE";
+  const id = searchParams.get("id") ?? "0";
 
   return new ImageResponse(
     (
