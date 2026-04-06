@@ -16,7 +16,6 @@ const fontBold = fetch(
 // ---------- TYPES & CONSTANTS ----------
 
 type ThemeKey = "pink-cyan" | "purple-blue" | "green-black" | "gold-black";
-
 type VariantKey = "default" | "square" | "portrait" | "twitter" | "tiktok";
 
 const THEMES: Record<
@@ -115,53 +114,44 @@ function getFontSize(roast: string, variant: VariantKey) {
   return 30;
 }
 
-// Simple fake QR pattern (visual, not necessarily scannable)
+// Static, OG‑safe QR‑like block (visual only)
 function QRBlock() {
-  const size = 140;
-  const cell = 10;
-  const blocks: JSX.Element[] = [];
-
-  for (let y = 0; y < size; y += cell) {
-    for (let x = 0; x < size; x += cell) {
-      const on =
-        (x < 30 && y < 30) ||
-        (x > size - 40 && y < 30) ||
-        (x < 30 && y > size - 40) ||
-        ((x + y) / cell) % 3 === 0;
-
-      if (on) {
-        blocks.push(
-          <div
-            key={`${x}-${y}`}
-            style={{
-              position: "absolute",
-              left: x,
-              top: y,
-              width: cell,
-              height: cell,
-              backgroundColor: "#ffffff",
-            }}
-          />
-        );
-      }
-    }
-  }
-
   return (
     <div
       style={{
         position: "absolute",
         right: 32,
         bottom: 32,
-        width: size,
-        height: size,
-        borderRadius: 16,
+        width: 140,
+        height: 140,
         backgroundColor: "#000000",
+        borderRadius: 16,
         border: "2px solid rgba(255,255,255,0.4)",
-        overflow: "hidden",
+        padding: 12,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-      {blocks}
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 100 100"
+        fill="white"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Static QR‑like pattern */}
+        <rect x="0" y="0" width="24" height="24" />
+        <rect x="76" y="0" width="24" height="24" />
+        <rect x="0" y="76" width="24" height="24" />
+
+        <rect x="40" y="8" width="10" height="10" />
+        <rect x="60" y="24" width="10" height="10" />
+        <rect x="24" y="44" width="10" height="10" />
+        <rect x="70" y="52" width="10" height="10" />
+        <rect x="44" y="70" width="10" height="10" />
+        <rect x="62" y="80" width="10" height="10" />
+      </svg>
     </div>
   );
 }
@@ -374,7 +364,7 @@ export async function GET(req: NextRequest) {
             </div>
           )}
 
-          {/* QR (always visible, but especially useful for share) */}
+          {/* QR visual */}
           <QRBlock />
 
           {/* URL label above QR */}
@@ -387,7 +377,7 @@ export async function GET(req: NextRequest) {
               fontSize: 18,
               opacity: 0.8,
               textAlign: "right",
-              maxWidth: 200,
+              maxWidth: 220,
             }}
           >
             {shareUrl.replace(/^https?:\/\//, "")}
@@ -416,7 +406,7 @@ export async function GET(req: NextRequest) {
         ],
       }
     );
-  } catch (err) {
+  } catch {
     return new Response("OG image generation failed", { status: 500 });
   }
 }
