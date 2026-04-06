@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
   const persona = getPersonaLabel(searchParams.get("persona"));
   const themeKey = getTheme(searchParams.get("theme"));
   const premium = searchParams.get("premium") === "true";
-  const watermark = searchParams.get("watermark") !== "false"; // default: true
+  const watermark = searchParams.get("watermark") !== "false";
 
   const theme = THEMES[themeKey];
   const badge = getIntensityBadge(intensity);
@@ -115,11 +115,11 @@ export async function GET(req: NextRequest) {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily:
+            "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
           position: "relative",
         }}
       >
-        {/* Outer Glow */}
         <div
           style={{
             position: "absolute",
@@ -132,7 +132,6 @@ export async function GET(req: NextRequest) {
           }}
         />
 
-        {/* Card */}
         <div
           style={{
             width: "1100px",
@@ -149,7 +148,6 @@ export async function GET(req: NextRequest) {
             position: "relative",
           }}
         >
-          {/* Persona */}
           {showPersona && (
             <div
               style={{
@@ -171,7 +169,6 @@ export async function GET(req: NextRequest) {
             </div>
           )}
 
-          {/* Intensity Badge */}
           <div
             style={{
               position: "absolute",
@@ -193,7 +190,6 @@ export async function GET(req: NextRequest) {
             <span>{badge.label}</span>
           </div>
 
-          {/* Roast Text */}
           <div
             style={{
               color: "white",
@@ -209,7 +205,6 @@ export async function GET(req: NextRequest) {
             {roast}
           </div>
 
-          {/* CTA */}
           {ctaText && (
             <div
               style={{
