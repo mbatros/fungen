@@ -3,16 +3,25 @@ export const runtime = "edge";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
+// ---------- FONT LOADING (Space Grotesk Regular + Bold) ----------
+
+const fontRegular = fetch(
+  new URL("../../assets/fonts/SpaceGrotesk-Regular.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+
+const fontBold = fetch(
+  new URL("../../assets/fonts/SpaceGrotesk-Bold.ttf", import.meta.url)
+).then((res) => res.arrayBuffer());
+
+// ---------- TYPES & CONSTANTS ----------
+
 type ThemeKey = "pink-cyan" | "purple-blue" | "green-black" | "gold-black";
+
+type VariantKey = "default" | "square" | "portrait" | "twitter" | "tiktok";
 
 const THEMES: Record<
   ThemeKey,
-  {
-    bg: string;
-    cardBg: string;
-    primary: string;
-    secondary: string;
-  }
+  { bg: string; cardBg: string; primary: string; secondary: string }
 > = {
   "pink-cyan": {
     bg: "#000000",
@@ -40,6 +49,19 @@ const THEMES: Record<
   },
 };
 
+const VARIANTS: Record<
+  VariantKey,
+  { width: number; height: number; maxWidth: number }
+> = {
+  default: { width: 1200, height: 630, maxWidth: 900 },
+  square: { width: 1080, height: 1080, maxWidth: 800 },
+  portrait: { width: 1080, height: 1350, maxWidth: 800 },
+  twitter: { width: 1600, height: 900, maxWidth: 1100 },
+  tiktok: { width: 1080, height: 1920, maxWidth: 800 },
+};
+
+// ---------- HELPERS ----------
+
 function getIntensityBadge(intensity: string | null) {
   switch ((intensity || "").toLowerCase()) {
     case "spicy":
@@ -62,18 +84,29 @@ function getIntensityBadge(intensity: string | null) {
 function getPersonaLabel(persona: string | null) {
   if (!persona) return null;
   const normalized = persona.trim();
-  if (!normalized) return null;
-  return normalized;
+  return normalized || null;
 }
 
 function getTheme(themeParam: string | null): ThemeKey {
   const key = (themeParam || "").toLowerCase() as ThemeKey;
-  if (key in THEMES) return key;
-  return "pink-cyan";
+  return key in THEMES ? key : "pink-cyan";
 }
 
-function getFontSize(roast: string) {
+function getVariant(variantParam: string | null): VariantKey {
+  const key = (variantParam || "").toLowerCase() as VariantKey;
+  return key in VARIANTS ? key : "default";
+}
+
+function getFontSize(roast: string, variant: VariantKey) {
   const len = roast.length;
+
+  if (variant === "tiktok" || variant === "portrait") {
+    if (len <= 60) return 60;
+    if (len <= 120) return 50;
+    if (len <= 200) return 42;
+    if (len <= 280) return 36;
+    return 32;
+  }
 
   if (len <= 60) return 56;
   if (len <= 120) return 48;
@@ -82,59 +115,120 @@ function getFontSize(roast: string) {
   return 30;
 }
 
+// Simple fake QR pattern (visual, not necessarily scannable)
+function QRBlock() {
+  const size = 140;
+  const cell = 10;
+  const blocks: JSX.Element[] = [];
+
+  for (let y = 0; y < size; y += cell) {
+    for (let x = 0; x < size; x += cell) {
+      const on =
+        (x < 30 && y < 30) ||
+        (x > size - 40 && y < 30) ||
+        (x < 30 && y > size - 40) ||
+        ((x + y) / cell) % 3 === 0;
+
+      if (on) {
+        blocks.push(
+          <div
+            key={`${x}-${y}`}
+            style={{
+              position: "absolute",
+              left: x,
+              top: y,
+              width: cell,
+              height: cell,
+              backgroundColor: "#ffffff",
+            }}
+          />
+        );
+      }
+    }
+  }
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        right: 32,
+        bottom: 32,
+        width: size,
+        height: size,
+        borderRadius: 16,
+        backgroundColor: "#000000",
+        border: "2px solid rgba(255,255,255,0.4)",
+        overflow: "hidden",
+      }}
+    >
+      {blocks}
+    </div>
+  );
+}
+
+// ---------- MAIN HANDLER ----------
+
 export async function GET(req: NextRequest) {
-  const { searchParams } = req.nextUrl;
+  try {
+    const { searchParams } = req.nextUrl;
 
-  const roast =
-    searchParams.get("roast")?.trim() || "You forgot to add a roast.";
-  const intensity = searchParams.get("intensity");
-  const persona = getPersonaLabel(searchParams.get("persona"));
-  const themeKey = getTheme(searchParams.get("theme"));
-  const premium = searchParams.get("premium") === "true";
-  const watermark = searchParams.get("watermark") !== "false";
+    const roast =
+      searchParams.get("roast")?.trim() || "You forgot to add a roast.";
+    const intensity = searchParams.get("intensity");
+    const persona = getPersonaLabel(searchParams.get("persona"));
+    const themeKey = getTheme(searchParams.get("theme"));
+    const premium = searchParams.get("premium") === "true";
+    const watermark = searchParams.get("watermark") !== "false";
+    const variantKey = getVariant(searchParams.get("variant"));
+    const avatarUrl = searchParams.get("avatar") || null;
+    const shareUrl = searchParams.get("url") || "https://fungen.com.au";
 
-  const theme = THEMES[themeKey];
-  const badge = getIntensityBadge(intensity);
-  const fontSize = getFontSize(roast);
+    const theme = THEMES[themeKey];
+    const badge = getIntensityBadge(intensity);
+    const variant = VARIANTS[variantKey];
+    const fontSize = getFontSize(roast, variantKey);
 
-  const showPersona = !!persona;
-  const showWatermark = watermark;
-  const ctaText = showWatermark
-    ? "Generate yours at fungen.com.au"
-    : premium
-    ? ""
-    : "fungen.com.au";
+    const ctaText = watermark
+      ? "Generate yours at fungen.com.au"
+      : premium
+      ? ""
+      : "fungen.com.au";
 
-  return new ImageResponse(
-    (
+    const [regularFont, boldFont] = await Promise.all([
+      fontRegular,
+      fontBold,
+    ]);
+
+    return new ImageResponse(
       <div
         style={{
-          width: "1200px",
-          height: "630px",
+          width: `${variant.width}px`,
+          height: `${variant.height}px`,
           background: theme.bg,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          fontFamily:
-            "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          fontFamily: "SpaceGrotesk",
           position: "relative",
         }}
       >
+        {/* Glow background */}
         <div
           style={{
             position: "absolute",
-            width: "1100px",
-            height: "530px",
+            width: `${variant.width - 100}px`,
+            height: `${variant.height - 100}px`,
             borderRadius: "32px",
-            background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-            opacity: 0.35,
+            background: `radial-gradient(circle at top left, ${theme.primary}, transparent 60%), radial-gradient(circle at bottom right, ${theme.secondary}, transparent 60%)`,
+            opacity: 0.45,
           }}
         />
 
+        {/* Card */}
         <div
           style={{
-            width: "1100px",
-            height: "530px",
+            width: `${variant.width - 100}px`,
+            height: `${variant.height - 100}px`,
             background: theme.cardBg,
             borderRadius: "32px",
             border: "2px solid rgba(255,255,255,0.08)",
@@ -146,80 +240,183 @@ export async function GET(req: NextRequest) {
             position: "relative",
           }}
         >
-          {showPersona && (
+          {/* Premium badge */}
+          {premium && (
             <div
               style={{
                 position: "absolute",
-                top: "32px",
-                left: "32px",
+                top: 32,
+                left: 32,
+                padding: "8px 20px",
+                borderRadius: "999px",
+                background:
+                  "linear-gradient(135deg, #facc15, #f97316, #ef4444)",
+                color: "#000000",
+                fontSize: 22,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                boxShadow: "0 0 18px rgba(250,204,21,0.6)",
+              }}
+            >
+              <span>⭐</span>
+              <span>PREMIUM USER</span>
+            </div>
+          )}
+
+          {/* Persona */}
+          {persona && (
+            <div
+              style={{
+                position: "absolute",
+                top: premium ? 80 : 32,
+                left: 32,
                 padding: "10px 22px",
                 borderRadius: "999px",
                 border: `1px solid ${theme.secondary}66`,
                 color: "#ffffff",
-                fontSize: "24px",
+                fontSize: 24,
                 opacity: 0.9,
                 background:
                   "linear-gradient(135deg, rgba(0,0,0,0.9), rgba(0,0,0,0.6))",
                 textTransform: "capitalize",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
               }}
             >
-              🎭 {persona}
+              <span>🎭</span>
+              <span>{persona}</span>
             </div>
           )}
 
+          {/* Intensity */}
           <div
             style={{
               position: "absolute",
-              top: "32px",
-              right: "32px",
+              top: 32,
+              right: 32,
               background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
               padding: "12px 28px",
               borderRadius: "999px",
               color: "white",
-              fontSize: "26px",
-              fontWeight: "bold",
+              fontSize: 26,
+              fontWeight: 700,
               display: "flex",
               alignItems: "center",
-              gap: "10px",
+              gap: 10,
+              boxShadow: "0 0 18px rgba(0,0,0,0.6)",
             }}
           >
             <span>{badge.emoji}</span>
             <span>{badge.label}</span>
           </div>
 
+          {/* Avatar (optional) */}
+          {avatarUrl && (
+            <div
+              style={{
+                position: "absolute",
+                left: 32,
+                bottom: 32,
+                width: 120,
+                height: 120,
+                borderRadius: "999px",
+                border: `3px solid ${theme.secondary}`,
+                overflow: "hidden",
+                boxShadow: "0 0 18px rgba(0,0,0,0.8)",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={avatarUrl}
+                alt="avatar"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+          )}
+
+          {/* Roast text */}
           <div
             style={{
               color: "white",
-              fontSize: `${fontSize}px`,
-              fontWeight: "bold",
+              fontSize,
+              fontWeight: 700,
               textAlign: "center",
               lineHeight: 1.3,
-              maxWidth: "900px",
+              maxWidth: `${variant.maxWidth}px`,
               whiteSpace: "pre-wrap",
+              paddingTop: premium || persona ? 40 : 0,
+              paddingBottom: 40,
             }}
           >
             {roast}
           </div>
 
+          {/* CTA / watermark */}
           {ctaText && (
             <div
               style={{
                 position: "absolute",
-                bottom: "32px",
+                bottom: 32,
+                left: avatarUrl ? 180 : 32,
                 color: theme.secondary,
-                fontSize: "26px",
+                fontSize: 26,
                 opacity: 0.95,
               }}
             >
               {ctaText}
             </div>
           )}
+
+          {/* QR (always visible, but especially useful for share) */}
+          <QRBlock />
+
+          {/* URL label above QR */}
+          <div
+            style={{
+              position: "absolute",
+              right: 32,
+              bottom: 32 + 140 + 8,
+              color: "#ffffff",
+              fontSize: 18,
+              opacity: 0.8,
+              textAlign: "right",
+              maxWidth: 200,
+            }}
+          >
+            {shareUrl.replace(/^https?:\/\//, "")}
+          </div>
         </div>
-      </div>
-    ),
-    {
-      width: 1200,
-      height: 630,
-    }
-  );
+      </div>,
+      {
+        width: variant.width,
+        height: variant.height,
+        headers: {
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+        fonts: [
+          {
+            name: "SpaceGrotesk",
+            data: regularFont,
+            weight: 400,
+            style: "normal",
+          },
+          {
+            name: "SpaceGrotesk",
+            data: boldFont,
+            weight: 700,
+            style: "normal",
+          },
+        ],
+      }
+    );
+  } catch (err) {
+    return new Response("OG image generation failed", { status: 500 });
+  }
 }
