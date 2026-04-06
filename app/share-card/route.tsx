@@ -127,7 +127,6 @@ export async function GET(req: NextRequest) {
             height: "530px",
             borderRadius: "32px",
             background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-            filter: "blur(40px)",
             opacity: 0.35,
           }}
         />
@@ -144,7 +143,6 @@ export async function GET(req: NextRequest) {
             justifyContent: "center",
             alignItems: "center",
             padding: "48px 56px",
-            boxShadow: `0 0 40px ${theme.primary}55, 0 0 40px ${theme.secondary}55`,
             position: "relative",
           }}
         >
@@ -180,7 +178,6 @@ export async function GET(req: NextRequest) {
               color: "white",
               fontSize: "26px",
               fontWeight: "bold",
-              boxShadow: `0 0 20px ${theme.primary}aa`,
               display: "flex",
               alignItems: "center",
               gap: "10px",
@@ -197,7 +194,6 @@ export async function GET(req: NextRequest) {
               fontWeight: "bold",
               textAlign: "center",
               lineHeight: 1.3,
-              textShadow: `0 0 14px ${theme.secondary}aa`,
               maxWidth: "900px",
               whiteSpace: "pre-wrap",
             }}
@@ -213,7 +209,6 @@ export async function GET(req: NextRequest) {
                 color: theme.secondary,
                 fontSize: "26px",
                 opacity: 0.95,
-                textShadow: `0 0 10px ${theme.secondary}cc`,
               }}
             >
               {ctaText}
