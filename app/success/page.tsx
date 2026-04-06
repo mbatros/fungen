@@ -1,34 +1,21 @@
-"use client";
-
-import { useEffect } from "react";
-
 export default function SuccessPage() {
-  useEffect(() => {
-    localStorage.setItem("savageUnlocked", "true");
-    localStorage.setItem("unlockDate", Date.now().toString());
-  }, []);
-
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "black",
-      color: "white",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center"
-    }}>
-      <h1>🔥 Savage Mode Activated!</h1>
-      <a href="/" style={{
-        marginTop: "20px",
-        padding: "12px 24px",
-        background: "purple",
-        color: "white",
-        borderRadius: "8px",
-        textDecoration: "none"
-      }}>
-        Go Back
-      </a>
-    </div>
+    <main className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
+      <div className="max-w-md w-full text-center">
+        <h1 className="text-3xl font-bold mb-4 text-emerald-400">
+          Savage Mode Unlocked
+        </h1>
+        <p className="text-sm text-zinc-300 mb-4">
+          Your subscription is active. You now have access to Savage and
+          Nuclear roasts with no watermark.
+        </p>
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-2 py-2.5 px-6 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 text-sm font-semibold"
+        >
+          Start Roasting
+        </button>
+      </div>
+    </main>
   );
 }

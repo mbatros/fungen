@@ -42,6 +42,8 @@ const THEMES: Record<
 
 function getIntensityBadge(intensity: string | null) {
   switch ((intensity || "").toLowerCase()) {
+    case "spicy":
+      return { label: "🌶 Spicy Mode", emoji: "🌶" };
     case "mild":
       return { label: "😅 Mild Mode", emoji: "😅" };
     case "savage":
@@ -53,7 +55,7 @@ function getIntensityBadge(intensity: string | null) {
     case "catastrophic":
       return { label: "☢️ Catastrophic Mode", emoji: "☢️" };
     default:
-      return { label: "🔥 Savage Mode", emoji: "🔥" };
+      return { label: "🌶 Spicy Mode", emoji: "🌶" };
   }
 }
 
@@ -147,7 +149,7 @@ export async function GET(req: NextRequest) {
             position: "relative",
           }}
         >
-          {/* Persona (top-left) */}
+          {/* Persona */}
           {showPersona && (
             <div
               style={{
@@ -169,7 +171,7 @@ export async function GET(req: NextRequest) {
             </div>
           )}
 
-          {/* Intensity Badge (top-right) */}
+          {/* Intensity Badge */}
           <div
             style={{
               position: "absolute",
@@ -207,7 +209,7 @@ export async function GET(req: NextRequest) {
             {roast}
           </div>
 
-          {/* CTA / Branding */}
+          {/* CTA */}
           {ctaText && (
             <div
               style={{

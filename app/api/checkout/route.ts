@@ -20,10 +20,12 @@ export async function GET(req: Request) {
   const cookies = parseCookies(req.headers.get("cookie"));
   let uid = cookies["fungen_uid"];
 
+  // Always ensure a UID exists
   if (!uid) {
     uid = crypto.randomBytes(16).toString("hex");
   }
 
+  // Create checkout session with proper customer metadata
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [
@@ -32,18 +34,33 @@ export async function GET(req: Request) {
         quantity: 1,
       },
     ],
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?upgraded=1`,
-    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?canceled=1`,
+
+    // Ensures Stripe creates a customer and attaches metadata
+    customer_creation: "always",
+
+    // Attach UID to the customer created by Checkout
+    customer_creation_options: {
+      metadata: {
+        fungen_uid: uid,
+      },
+    },
+
+    // Also attach UID to the session for webhook reference
     client_reference_id: uid,
     metadata: {
       fungen_uid: uid,
     },
+
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?upgraded=1`,
+    cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/?canceled=1`,
   });
 
+  // Set cookie for 1 year
   const res = NextResponse.redirect(session.url as string, 303);
   res.headers.set(
     "Set-Cookie",
     `fungen_uid=${uid}; Path=/; Domain=.fungen.com.au; Max-Age=31536000; SameSite=Lax; Secure`
   );
+
   return res;
 }

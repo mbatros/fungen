@@ -39,9 +39,17 @@ export async function POST(req: Request) {
         session.metadata?.fungen_uid ||
         null;
 
+      // Fetch existing customer metadata so we don't wipe fungen_uid later
+      const customer = (await stripe.customers.retrieve(
+        customerId
+      )) as Stripe.Customer;
+
+      const existingMeta = customer.metadata || {};
+
       if (uid) {
         await stripe.customers.update(customerId, {
           metadata: {
+            ...existingMeta,
             ...(session.metadata || {}),
             fungen_uid: uid,
             subscription_active: "true",
@@ -62,10 +70,18 @@ export async function POST(req: Request) {
 
       const isActive =
         subscription.status === "active" ||
-        subscription.status === "trialing";
+        subscription.status === "trialing" ||
+        subscription.status === "past_due";
+
+      const customer = (await stripe.customers.retrieve(
+        customerId
+      )) as Stripe.Customer;
+
+      const existingMeta = customer.metadata || {};
 
       await stripe.customers.update(customerId, {
         metadata: {
+          ...existingMeta,
           subscription_active: isActive ? "true" : "false",
         },
       });
@@ -80,8 +96,15 @@ export async function POST(req: Request) {
       const subscription = event.data.object as Stripe.Subscription;
       const customerId = subscription.customer.toString();
 
+      const customer = (await stripe.customers.retrieve(
+        customerId
+      )) as Stripe.Customer;
+
+      const existingMeta = customer.metadata || {};
+
       await stripe.customers.update(customerId, {
         metadata: {
+          ...existingMeta,
           subscription_active: "false",
         },
       });
@@ -97,8 +120,15 @@ export async function POST(req: Request) {
       const customerId = invoice.customer?.toString();
 
       if (customerId) {
+        const customer = (await stripe.customers.retrieve(
+          customerId
+        )) as Stripe.Customer;
+
+        const existingMeta = customer.metadata || {};
+
         await stripe.customers.update(customerId, {
           metadata: {
+            ...existingMeta,
             subscription_active: "false",
           },
         });

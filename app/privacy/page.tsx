@@ -1,80 +1,46 @@
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-10 flex justify-center">
-      <div className="max-w-3xl w-full">
-        <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
+    <main className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
+      <div className="max-w-2xl w-full space-y-4 text-sm text-zinc-200">
+        <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
 
-        <p className="text-sm text-zinc-300 mb-4">
-          Last updated: March 2026
+        <p>
+          FunGen collects only the minimum information needed to operate the
+          service, process payments, and prevent abuse.
         </p>
 
-        <p className="text-sm text-zinc-300 mb-6">
-          This Privacy Policy explains how FunGen (“we”, “our”, “us”) collects, uses, and protects information when you use our website and AI‑powered services at fungen.com.au.
-        </p>
-
-        <h2 className="text-xl font-semibold mt-8 mb-3">Information We Collect</h2>
-
-        <p className="text-sm text-zinc-300 mb-4">
-          We do not collect personal accounts or login details. We operate using anonymous identifiers.
-        </p>
-
-        <ul className="text-sm text-zinc-300 space-y-2 mb-6">
-          <li>• <strong>Anonymous Device ID (fungen_uid)</strong> — stored in a cookie to identify your device for subscription access.</li>
-          <li>• <strong>Subscription Information</strong> — Stripe provides us with subscription status (active/inactive), renewal dates, and payment status.</li>
-          <li>• <strong>Optional Email</strong> — only if you enter it during Restore Purchase or Stripe checkout.</li>
-          <li>• <strong>Roast Inputs</strong> — processed temporarily by our AI provider to generate responses. We do not store them.</li>
+        <h2 className="text-lg font-semibold mt-4">Data we collect</h2>
+        <ul className="list-disc list-inside space-y-1">
+          <li>Roast prompts and generated content for processing and abuse prevention.</li>
+          <li>Anonymous identifiers (like cookies) to remember your session.</li>
+          <li>Subscription and billing information handled securely by Stripe.</li>
         </ul>
 
-        <h2 className="text-xl font-semibold mt-8 mb-3">How We Use Information</h2>
-
-        <ul className="text-sm text-zinc-300 space-y-2 mb-6">
-          <li>• Provide access to Spicy, Savage, and Nuclear roast levels.</li>
-          <li>• Verify subscription status.</li>
-          <li>• Restore access if you clear cookies.</li>
-          <li>• Improve service performance and prevent abuse.</li>
-        </ul>
-
-        <h2 className="text-xl font-semibold mt-8 mb-3">Stripe Payments</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          Payments are processed securely by Stripe. We do not store credit card numbers. Stripe may store your email, payment method, and billing details according to their own Privacy Policy.
+        <h2 className="text-lg font-semibold mt-4">Payments</h2>
+        <p>
+          All payments are processed by Stripe. We do not store your full
+          payment details on our servers.
         </p>
 
-        <h2 className="text-xl font-semibold mt-8 mb-3">Cookies</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          We use a single cookie (“fungen_uid”) to identify your device for subscription access. Clearing cookies may require using Restore Purchase.
+        <h2 className="text-lg font-semibold mt-4">Cookies</h2>
+        <p>
+          We use a cookie to associate your browser with your subscription
+          status (Savage Mode). This cookie does not track you across other
+          sites.
         </p>
 
-        <h2 className="text-xl font-semibold mt-8 mb-3">AI Processing</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          Your roast inputs are sent to our AI provider for processing. We do not store or reuse your inputs. Outputs are generated in real time.
+        <h2 className="text-lg font-semibold mt-4">Contact</h2>
+        <p>
+          If you have questions about this policy, please contact us via the
+          website.
         </p>
 
-        <h2 className="text-xl font-semibold mt-8 mb-3">Data Sharing</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          We do not sell or share your data. We only share necessary information with:
-        </p>
-
-        <ul className="text-sm text-zinc-300 space-y-2 mb-6">
-          <li>• Stripe (payments)</li>
-          <li>• AI provider (roast generation)</li>
-          <li>• Hosting provider (Vercel)</li>
-        </ul>
-
-        <h2 className="text-xl font-semibold mt-8 mb-3">Your Rights</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          You may request deletion of your Stripe customer record by contacting support@fungen.com.au.
-        </p>
-
-        <h2 className="text-xl font-semibold mt-8 mb-3">Contact</h2>
-
-        <p className="text-sm text-zinc-300 mb-6">
-          Email: support@fungen.com.au
-        </p>
+        <button
+          onClick={() => (window.location.href = "/")}
+          className="mt-4 py-2.5 px-6 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs"
+        >
+          Back to FunGen
+        </button>
       </div>
     </main>
   );

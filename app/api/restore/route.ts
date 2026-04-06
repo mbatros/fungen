@@ -1,71 +1,76 @@
-import { NextResponse } from "next/server";
-import Stripe from "stripe";
+"use client";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2024-06-20",
-});
+import { useEffect, useState } from "react";
 
-// Web‑crypto replacement for random UID
-function generateUID() {
-  const bytes = crypto.getRandomValues(new Uint8Array(16));
-  return Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
+type StatusResponse = {
+  active: boolean;
+  expires: number | null;
+  uid: string | null;
+};
 
-export async function POST(req: Request) {
-  const { email } = await req.json();
+export default function RestorePage() {
+  const [status, setStatus] = useState<StatusResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!email || typeof email !== "string") {
-    return NextResponse.json(
-      { ok: false, error: "Email required" },
-      { status: 400 }
-    );
-  }
+  useEffect(() => {
+    const load = async () => {
+      const res = await fetch("/api/subscription-status", {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      setStatus(data);
+      setLoading(false);
+    };
+    load();
+  }, []);
 
-  const customers = await stripe.customers.list({
-    email,
-    limit: 1,
-    expand: ["data.subscriptions"],
-  });
+  return (
+    <main className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
+      <div className="max-w-md w-full">
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          Restore Purchase
+        </h1>
 
-  const customer = customers.data[0];
+        {loading && (
+          <div className="text-center text-zinc-400">Checking…</div>
+        )}
 
-  if (!customer) {
-    return NextResponse.json({
-      ok: false,
-      error: "No active subscription found for that email.",
-    });
-  }
+        {!loading && status && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-3">
+            {status.active ? (
+              <>
+                <p className="text-sm text-emerald-300">
+                  Savage Mode is already active on this device.
+                </p>
+                {status.expires && (
+                  <p className="text-xs text-zinc-400">
+                    Renews:{" "}
+                    {new Date(status.expires * 1000).toLocaleString()}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-zinc-300">
+                  We couldn&apos;t find an active subscription linked to this
+                  browser.
+                </p>
+                <p className="text-xs text-zinc-500">
+                  If you subscribed on another device or browser, open FunGen
+                  there and visit Settings → Restore.
+                </p>
+              </>
+            )}
 
-  const hasActiveSub = customer.subscriptions?.data?.some(
-    (s) => s.status === "active" || s.status === "trialing"
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="w-full mt-3 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-sm"
+            >
+              Back to FunGen
+            </button>
+          </div>
+        )}
+      </div>
+    </main>
   );
-
-  if (!hasActiveSub) {
-    return NextResponse.json({
-      ok: false,
-      error: "No active subscription found.",
-    });
-  }
-
-  // SAFE: Web‑crypto UID
-  const uid = generateUID();
-
-  await stripe.customers.update(customer.id, {
-    metadata: {
-      ...(customer.metadata || {}),
-      fungen_uid: uid,
-    },
-  });
-
-  const res = NextResponse.json({ ok: true });
-
-  // Cookie stays the same
-  res.headers.set(
-    "Set-Cookie",
-    `fungen_uid=${uid}; Path=/; Domain=.fungen.com.au; Max-Age=31536000; SameSite=Lax; Secure`
-  );
-
-  return res;
 }

@@ -19,6 +19,7 @@ export async function GET(req: Request) {
   const cookies = parseCookies(req.headers.get("cookie"));
   const uid = cookies["fungen_uid"];
 
+  // No cookie → definitely not subscribed
   if (!uid) {
     return NextResponse.json({
       active: false,
@@ -27,14 +28,13 @@ export async function GET(req: Request) {
     });
   }
 
-  const customers = await stripe.customers.list({
-    limit: 1,
+  // Search Stripe customers by metadata
+  const search = await stripe.customers.search({
+    query: `metadata['fungen_uid']:'${uid}'`,
     expand: ["data.subscriptions"],
   });
 
-  const customer = customers.data.find(
-    (c) => c.metadata?.fungen_uid === uid
-  );
+  const customer = search.data[0];
 
   if (!customer) {
     return NextResponse.json({
@@ -44,13 +44,19 @@ export async function GET(req: Request) {
     });
   }
 
-  const active = customer.metadata?.subscription_active === "true";
-
+  // Determine subscription status
   const sub = customer.subscriptions?.data?.[0];
+
+  const isActive =
+    sub &&
+    (sub.status === "active" ||
+      sub.status === "trialing" ||
+      sub.status === "past_due");
+
   const expires = sub?.current_period_end || null;
 
   return NextResponse.json({
-    active,
+    active: !!isActive,
     expires,
     uid,
   });

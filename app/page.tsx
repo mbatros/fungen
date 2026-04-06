@@ -14,16 +14,22 @@ type RoastResponse = {
 
 export default function HomePage() {
   const [input, setInput] = useState("");
-  const [intensity, setIntensity] = useState<"spicy" | "savage" | "nuclear">("spicy");
+  const [intensity, setIntensity] =
+    useState<"spicy" | "savage" | "nuclear">("spicy");
   const [loading, setLoading] = useState(false);
   const [roast, setRoast] = useState<RoastResponse | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [checkingSub, setCheckingSub] = useState(true);
 
+  const theme: "pink-cyan" | "purple-blue" | "green-black" | "gold-black" =
+    "pink-cyan";
+
   useEffect(() => {
     const check = async () => {
       setCheckingSub(true);
-      const res = await fetch("/api/subscription-status", { cache: "no-store" });
+      const res = await fetch("/api/subscription-status", {
+        cache: "no-store",
+      });
       const data = await res.json();
       setIsPro(data.active === true);
       setCheckingSub(false);
@@ -47,12 +53,51 @@ export default function HomePage() {
     setLoading(false);
   };
 
-  const handleShareCard = async () => {
+  const buildShareUrl = (r: RoastResponse) => {
+    const params = new URLSearchParams({
+      roast: r.roast,
+      intensity: r.intensity,
+      persona: r.persona,
+      theme,
+      premium: r.pro ? "true" : "false",
+      watermark: r.pro ? "false" : "true",
+    });
+
+    if (typeof window === "undefined") return `/share-card?${params.toString()}`;
+    return `${window.location.origin}/share-card?${params.toString()}`;
+  };
+
+  const handleShareCard = () => {
     if (!roast) return;
-    const url = `/share-card?roast=${encodeURIComponent(
-      roast.roast
-    )}&intensity=${roast.intensity}&id=${roast.roastId}`;
+    const url = buildShareUrl(roast);
     window.open(url, "_blank");
+  };
+
+  const handleCopyLink = async () => {
+    if (!roast) return;
+    const url = buildShareUrl(roast);
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("Link copied to clipboard.");
+    } catch {
+      alert("Could not copy link. Long-press or right-click the share card instead.");
+    }
+  };
+
+  const handleDownload = () => {
+    if (!roast) return;
+    const url = buildShareUrl(roast);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "fungen-roast.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleRegenerate = () => {
+    if (!input.trim()) return;
+    handleRoast();
   };
 
   const goToCheckout = () => {
@@ -196,12 +241,30 @@ export default function HomePage() {
               </span>
             </div>
             <p className="text-sm leading-relaxed mb-3">{roast.roast}</p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleShareCard}
-                className="flex-1 py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
+                className="flex-1 min-w-[45%] py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
               >
                 Open Share Card
+              </button>
+              <button
+                onClick={handleCopyLink}
+                className="flex-1 min-w-[45%] py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
+              >
+                Copy Link
+              </button>
+              <button
+                onClick={handleDownload}
+                className="flex-1 min-w-[45%] py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
+              >
+                Download Card
+              </button>
+              <button
+                onClick={handleRegenerate}
+                className="flex-1 min-w-[45%] py-2 rounded-xl bg-zinc-900 border border-zinc-700 text-xs text-zinc-200"
+              >
+                Generate Again
               </button>
             </div>
             <p className="mt-2 text-[10px] text-zinc-600">
@@ -210,9 +273,22 @@ export default function HomePage() {
           </section>
         )}
 
-        <footer className="mt-6 text-center text-[10px] text-zinc-600">
-          Built for screenshots, TikToks, and chaos. Tag your clips with{" "}
-          <span className="text-fuchsia-400">#FunGenSavage</span>.
+        <footer className="mt-6 text-center text-[10px] text-zinc-600 space-y-1">
+          <p>
+            Built for screenshots, TikToks, and chaos. Tag your clips with{" "}
+            <span className="text-fuchsia-400">#FunGenSavage</span>.
+          </p>
+          <p className="space-x-3">
+            <a href="/settings" className="underline text-zinc-400">
+              Settings
+            </a>
+            <a href="/privacy" className="underline text-zinc-400">
+              Privacy
+            </a>
+            <a href="/terms" className="underline text-zinc-400">
+              Terms
+            </a>
+          </p>
         </footer>
       </div>
     </main>
