@@ -4,7 +4,7 @@ const nextConfig = {
   experimental: {
     serverActions: true,
   },
-  // ⭐ Prevent Next.js from trying to statically export pages
+  // ⭐ Prevent static export mode
   generateStaticParams: () => [],
 };
 
