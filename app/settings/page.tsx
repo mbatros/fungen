@@ -8,7 +8,7 @@ type StatusResponse = {
   uid: string | null;
 };
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export default function SettingsPage() {
   const [status, setStatus] = useState<StatusResponse | null>(null);

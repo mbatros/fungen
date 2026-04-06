@@ -1,4 +1,4 @@
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-black text-white flex flex-col items-center px-4 py-10">
